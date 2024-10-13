@@ -1,0 +1,7 @@
+target
+crac-files/*
+target/*
+*.jar
+dockerfiles/*
+Dockerfile_*
+scripts/*
