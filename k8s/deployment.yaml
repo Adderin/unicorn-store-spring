@@ -1,0 +1,58 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: unicorn-store-spring
+  namespace: unicorn-store-spring
+  labels:
+    app: unicorn-store-spring
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: unicorn-store-spring
+  template:
+    metadata:
+      labels:
+        app: unicorn-store-spring
+    spec:
+      serviceAccountName: unicorn-store-spring
+      containers:
+        - name: unicorn-store-spring
+          resources:
+            requests:
+              cpu: "1.5"
+              memory: "1.5Gi"
+          image: 225895057522.dkr.ecr.eu-central-1.amazonaws.com/unicorn-store-spring:latest
+          imagePullPolicy: Always
+          env:
+            - name: SPRING_DATASOURCE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: "unicornstore-db-secret"
+                  key: "password"
+                  optional: false
+            - name: SPRING_DATASOURCE_URL
+              value: jdbc:postgresql://unicorninstance.crcmiku8cul7.eu-central-1.rds.amazonaws.com:5432/unicorns
+          ports:
+            - containerPort: 8080
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: 8080
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: 8080
+          startupProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: 8080
+            failureThreshold: 6
+            periodSeconds: 10
+          lifecycle:
+            preStop:
+              exec:
+                command: ["sh", "-c", "sleep 10"]
+          securityContext:
+            runAsNonRoot: true
+            allowPrivilegeEscalation: false

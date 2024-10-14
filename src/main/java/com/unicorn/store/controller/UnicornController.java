@@ -91,8 +91,22 @@ public class UnicornController {
         } finally {
         }
     }
+
     @GetMapping("/")
-    public ResponseEntity<String> getWelcomeMessage() {
-        return new ResponseEntity<>("Welcome to the Unicorn Store!", HttpStatus.OK);
+public ResponseEntity<String> getWelcomeMessage() {
+    return new ResponseEntity<>("Welcome to the Unicorn Store - from Optimized JVM!", HttpStatus.OK);
+}
+
+    @GetMapping("/hostname")
+    public ResponseEntity<String> getHostname() {
+        try {
+            String hostname = java.net.InetAddress.getLocalHost().getHostName();
+            return ResponseEntity.ok(hostname);
+        } catch (Exception e) {
+            String errorMsg = "Error getting hostname";
+            logger.error(errorMsg, e);
+            throw new ResponseStatusException(INTERNAL_SERVER_ERROR, errorMsg, e);
+        } finally {
+        }
     }
 }
